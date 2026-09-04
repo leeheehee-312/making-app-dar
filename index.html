@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>국립춘천박물관 명탐정단: 사라진 오백나한의 비밀</title>
+  
+  <script>
+    // 카카오톡, 라인 등 인앱 브라우저에서 카메라 및 스크립트 차단 방지를 위한 외부 브라우저(크롬/사파리) 자동 탈출 스크립트
+    (function checkInAppBrowser() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const targetUrl = window.location.href;
+
+      if (userAgent.indexOf('kakaotalk') > -1) {
+        if (userAgent.indexOf('android') > -1) {
+          window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+        } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
+          window.location.href = 'kakaoweb://openExternal?url=' + encodeURIComponent(targetUrl);
+        }
+      } else if (userAgent.indexOf('line') > -1) {
+        if (targetUrl.indexOf('?') !== -1) {
+          window.location.href = targetUrl + '&openExternalBrowser=1';
+        } else {
+          window.location.href = targetUrl + '?openExternalBrowser=1';
+        }
+      }
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Jua & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            jua: ['Jua', 'sans-serif'],
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            museum: {
+              navy: '#0b1329',
+              deep: '#142242',
+              gold: '#c59b27',
+              lightgold: '#e6c875',
+              bronze: '#8c6239',
+              teal: '#1b4d47',
+              crimson: '#942226',
+              cream: '#faf7f2',
+              parchment: '#f3ece0',
+              border: '#dfd3c1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070c18;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .bg-paper {
+      background-color: #faf7f2;
+      background-image: radial-gradient(#dfd4c0 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.02); opacity: 0.9; }
+    }
+    .pulse-soft {
+      animation: pulseSoft 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased min-h-screen flex justify-center items-center p-0 md:p-4">
+
+  <!-- Mobile App Frame Container -->
+  <div id="appContainer" class="w-full max-w-md h-[100dvh] md:h-[890px] bg-museum-cream flex flex-col relative overflow-hidden shadow-2xl md:rounded-3xl border-0 md:border-4 border-museum-navy">
+    
+    <!-- Top Museum Header -->
+    <header class="bg-museum-navy text-white px-4 py-3 safe-top flex items-center justify-between shadow-md z-30 shrink-0 border-b-2 border-museum-gold/40">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-museum-gold flex items-center justify-center text-museum-navy shadow">
+          <i class="fa-solid fa-building-columns text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-jua text-base tracking-wide text-white leading-tight">국립춘천박물관</h1>
+            <span class="text-[9px] bg-museum-gold/25 text-amber-300 px-1.5 py-0.2 rounded font-bold border border-museum-gold/40">탐정본부</span>
+          </div>
+          <p class="text-[11px] text-amber-200/90 font-medium" id="currentRoomIndicator">사건 접수처</p>
+        </div>
+      </div>
+      
+      <!-- Top Actions -->
+      <div class="flex items-center space-x-1.5">
+        <!-- Audio Mute Toggle -->
+        <button id="soundToggleBtn" aria-label="음소거 토글" class="w-8 h-8 rounded-lg bg-slate-800/80 text-amber-300 text-xs flex items-center justify-center border border-slate-700 active:scale-95 transition">
+          <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Museum Map & Floor Guide -->
+        <button id="guideInfoBtn" class="bg-slate-800/90 hover:bg-slate-800 text-amber-300 text-xs px-2.5 py-1.5 rounded-lg border border-amber-400/30 font-jua transition active:scale-95 flex items-center gap-1">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span class="text-[11px]">안내</span>
+        </button>
+
+        <!-- Detective Notebook -->
+        <button id="openNotebookBtn" class="bg-gradient-to-r from-amber-600 to-amber-700 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-jua shadow transition active:scale-95 border border-amber-300/40">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>수첩</span>
+          <span id="collectedCountBadge" class="bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Screen Viewport -->
+    <main id="screenArea" class="flex-1 overflow-y-auto custom-scroll relative flex flex-col p-4 bg-paper">
+      <!-- Dynamically Rendered by JavaScript -->
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer class="bg-white/95 backdrop-blur px-4 py-2 safe-bottom border-t border-amber-200/70 flex items-center justify-between text-[11px] text-slate-500 font-medium shrink-0 shadow-inner">
+      <div class="flex items-center gap-1.5">
+        <div class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 text-[10px]">
+          <i class="fa-solid fa-user-secret"></i>
+        </div>
+        <span>수석탐정: <strong id="footerDetectiveName" class="text-museum-navy font-bold">춘천홈즈</strong></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="progressPill" class="bg-amber-50 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full font-bold text-[10px]">
+          미션 0/9 • 사진 0/3
+        </span>
+      </div>
+    </footer>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="absolute top-14 left-1/2 -translate-x-1/2 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-slate-950/90 backdrop-blur-md text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 border border-museum-gold">
+      <i id="toastIcon" class="fa-solid fa-bell text-museum-gold text-sm"></i>
+      <span id="toastMessage">알림 내용</span>
+    </div>
+
+    <!-- Universal Custom Dialog Modal -->
+    <div id="customModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-5 max-w-xs w-full shadow-2xl border-2 border-museum-navy text-center animate-fade-in">
+        <div id="modalIconBox" class="w-12 h-12 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner border border-amber-200">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <h3 id="modalTitle" class="font-jua text-lg text-museum-navy mb-1.5">안내</h3>
+        <p id="modalDesc" class="text-xs text-slate-600 mb-4 whitespace-pre-line leading-relaxed">내용</p>
+        <div class="flex gap-2 justify-center" id="modalButtons">
+          <button id="modalConfirmBtn" class="w-full bg-museum-navy hover:bg-slate-800 text-white font-jua text-sm py-2.5 rounded-xl active:scale-95 shadow transition">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Preview / Fallback Save Modal -->
+    <div id="imageSaveModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-4 max-w-sm w-full shadow-2xl border-2 border-museum-gold text-center flex flex-col max-h-[90vh]">
+        <div class="flex justify-between items-center pb-2 border-b border-gray-100 mb-2">
+          <h3 id="imageSaveModalTitle" class="font-jua text-sm text-museum-navy flex items-center gap-1.5">
+            <i class="fa-solid fa-image text-amber-600"></i> 생성된 사진 확인
+          </h3>
+          <button id="closeImageSaveModalBtn" class="text-gray-400 hover:text-gray-600 text-lg p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-500 mb-2">자동 다운로드가 안 될 경우 사진을 <strong>길게 눌러 '이미지 저장'</strong>을 선택하세요.</p>
+        <div class="flex-1 overflow-auto rounded-xl bg-slate-100 border border-slate-200 p-1 flex items-center justify-center">
+          <img id="imageSaveModalImg" src="" alt="유물 사진" class="max-h-full max-w-full object-contain rounded-lg shadow">
+        </div>
+        <div class="mt-3 flex gap-2">
+          <a id="imageSaveModalDownloadBtn" href="#" download="" class="flex-1 bg-museum-navy text-white font-jua text-xs py-2.5 rounded-xl shadow active:scale-95 flex items-center justify-center gap-1">
+            <i class="fa-solid fa-download"></i> 직접 다운로드
+          </a>
+          <button id="imageSaveModalCloseBtn" class="px-4 bg-slate-200 text-slate-700 font-jua text-xs py-2.5 rounded-xl">
+            닫기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Museum Information Modal -->
+    <div id="infoModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border-2 border-museum-gold text-slate-700">
+        <div class="flex justify-between items-center pb-2.5 border-b border-amber-100 mb-3">
+          <h3 class="font-jua text-base text-museum-navy flex items-center gap-1.5">
+            <i class="fa-solid fa-landmark text-amber-600"></i> 국립춘천박물관 안내
+          </h3>
+          <button id="closeInfoModalBtn" class="text-gray-400 hover:text-gray-600 text-lg p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="text-xs space-y-2.5 leading-relaxed max-h-[65vh] overflow-y-auto custom-scroll pr-1">
+          <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200">
+            <p class="font-bold text-museum-navy mb-1">🏛️ 위치 및 관람 안내</p>
+            <p class="text-slate-600 text-[11px]">• 강원특별자치도 춘천시 우석로 70</p>
+            <p class="text-slate-600 text-[11px]">• 관람시간: 09:00 ~ 18:00 (월요일 휴관 / 관람료 무료)</p>
+          </div>
+
+          <div class="space-y-1.5">
+            <p class="font-bold text-slate-800 flex items-center gap-1">
+              <i class="fa-solid fa-compass text-amber-600"></i> 명탐정 탐험 동선:
+            </p>
+            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px]">
+              <span class="font-bold text-amber-800">1층 제1전시실:</span> 강원의 선사 (중도 빗살무늬토기, 간석기)
+            </div>
+            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px]">
+              <span class="font-bold text-blue-800">1층 제2전시실:</span> 고대 강원의 성장 (초당동 신라 금귀걸이, 철제 무구)
+            </div>
+            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px]">
+              <span class="font-bold text-emerald-800">2층 제3전시실 & 브랜드실:</span> 고려·조선 & 영월 창령사 터 오백나한
+            </div>
+          </div>
+
+          <div class="p-2.5 bg-red-50 rounded-xl border border-red-200 text-[11px] text-red-900">
+            <strong>🤫 박물관 탐정 에티켓:</strong><br>
+            유물 보호를 위해 플래시를 끄고 조용히 걸으며 탐험해 주세요!
+          </div>
+        </div>
+        <button id="ackInfoBtn" class="w-full mt-4 bg-museum-navy text-white font-jua text-xs py-2.5 rounded-xl active:scale-95 shadow">확인했습니다</button>
+      </div>
+    </div>
+
+    <!-- Detective Notebook Modal -->
+    <div id="notebookModal" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden flex flex-col justify-end">
+      <div class="bg-museum-cream rounded-t-3xl max-h-[90%] flex flex-col border-t-4 border-museum-gold p-4 pb-6 shadow-2xl">
+        <div class="flex items-center justify-between pb-3 border-b border-amber-200 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-800">
+              <i class="fa-solid fa-book-bookmark text-base"></i>
+            </div>
+            <div>
+              <h2 class="font-jua text-base text-museum-navy">명탐정 수사 수첩</h2>
+              <p class="text-[10px] text-slate-500">수집한 단서와 현장에서 직접 촬영한 최애 유물 컬렉션</p>
+            </div>
+          </div>
+          <button id="closeNotebookBtn" class="text-gray-400 hover:text-gray-600 text-lg p-1.5">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto space-y-3 custom-scroll flex-1 pr-0.5" id="notebookItemsList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let isSoundMuted = false;
+    let audioCtx = null;
+
+    function initAudio() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {
+        console.warn('AudioContext not supported or permission denied:', e);
+      }
+    }
+
+    function playSound(type) {
+      if (isSoundMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      try {
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'correct') {
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            const st = now + i * 0.07;
+            o.frequency.setValueAtTime(freq, st);
+            g.gain.setValueAtTime(0.15, st);
+            g.gain.exponentialRampToValueAtTime(0.001, st + 0.22);
+            o.start(st);
+            o.stop(st + 0.23);
+          });
+        } else if (type === 'wrong') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(180, now + 0.1);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'shutter') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(850, now);
+          osc.frequency.exponentialRampToValueAtTime(100, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'fanfare') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            const st = now + (idx * 0.09);
+            o.frequency.setValueAtTime(freq, st);
+            g.gain.setValueAtTime(0.2, st);
+            g.gain.exponentialRampToValueAtTime(0.001, st + 0.35);
+            o.start(st);
+            o.stop(st + 0.36);
+          });
+        }
+      } catch (err) {
+        console.warn('Audio playback error ignored:', err);
+      }
+    }
+
+    // Sound toggle listener
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    soundToggleBtn.addEventListener('click', () => {
+      initAudio();
+      isSoundMuted = !isSoundMuted;
+      if (isSoundMuted) {
+        soundIcon.className = 'fa-solid fa-volume-xmark text-slate-400';
+        showToast('정숙 모드(음소거)가 켜졌습니다.', 'fa-volume-xmark');
+      } else {
+        soundIcon.className = 'fa-solid fa-volume-high text-amber-300';
+        showToast('효과음이 켜졌습니다.', 'fa-volume-high');
+        playSound('click');
+      }
+    });
+
+    // Helper SVG illustrations as ultra-reliable image fallbacks
+    const FALLBACK_ILLUSTRATIONS = {
+      pottery: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="%23f3ece0"/><path d="M120,80 L280,80 L250,260 L200,340 L150,260 Z" fill="%23c48b52" stroke="%238c532b" stroke-width="6"/><path d="M140,110 L260,110 M145,140 L255,140 M150,170 L250,170 M160,200 L240,200 M170,230 L230,230" stroke="%23703d1b" stroke-width="4" stroke-dasharray="6,4"/><text x="200" y="375" font-size="20" font-family="sans-serif" font-weight="bold" fill="%230b1329" text-anchor="middle">춘천 중도 빗살무늬토기</text></svg>`,
+      earring: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="%23f3ece0"/><circle cx="200" cy="140" r="50" fill="none" stroke="%23eab308" stroke-width="16"/><circle cx="200" cy="240" r="30" fill="%23f59e0b" stroke="%23b45309" stroke-width="6"/><circle cx="200" cy="300" r="14" fill="%23fbbf24"/><text x="200" y="370" font-size="20" font-family="sans-serif" font-weight="bold" fill="%230b1329" text-anchor="middle">강릉 초당동 신라 금귀걸이</text></svg>`,
+      arhat: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="%23f3ece0"/><circle cx="200" cy="150" r="65" fill="%23d6d3d1" stroke="%2378716c" stroke-width="6"/><path d="M180,145 Q190,140 180,135 M220,145 Q210,140 220,135" stroke="%2344403c" stroke-width="4" fill="none"/><path d="M190,175 Q200,190 210,175" stroke="%2344403c" stroke-width="4" fill="none"/><path d="M135,220 Q200,200 265,220 L280,330 L120,330 Z" fill="%23a8a29e" stroke="%2378716c" stroke-width="6"/><text x="200" y="375" font-size="20" font-family="sans-serif" font-weight="bold" fill="%230b1329" text-anchor="middle">영월 창령사 터 오백나한</text></svg>`
+    };
+
+    const museumData = {
+      detectiveName: '춘천홈즈',
+      currentRoomIndex: 0,
+      rooms: [
+        {
+          id: 1,
+          name: "선사시대 전시실",
+          title: "제1전시실: 강원의 선사",
+          locationTag: "상설전시관 1층",
+          themeColor: "amber",
+          leadArtifact: {
+            name: "춘천 중도 빗살무늬토기",
+            era: "신석기시대 (기원전 약 4000년)",
+            origin: "강원 춘천시 중도 유적 출토",
+            imgUrl: FALLBACK_ILLUSTRATIONS.pottery,
+            desc: "북한강변 모래펄에 꽂아두기 알맞은 뾰족한 밑바닥과 정교한 기하학적 빗살무늬를 자랑하는 강원 선사의 대표 문화유산입니다."
+          },
+          missions: [
+            { id: 1, title: "빗살무늬 돋보기 관찰 퀴즈", type: "quiz", completed: false, clue: "보물의 첫 번째 재질: 천 년 풍파를 견디는 단단한 석조의 힘" },
+            { id: 2, title: "선사시대 간석기 용도 짝맞추기", type: "matching", completed: false, clue: "보물의 숨결: 자연과 흙, 소박한 인간미의 온기" },
+            { id: 3, title: "최애 선사 유물 사진 촬영 & 프레임 수집", type: "photo", completed: false, clue: "선사 암각 뱃지 수여" }
+          ],
+          photo: null,
+          badgeName: "선사 암각 뱃지",
+          badgeIcon: "fa-volcano"
+        },
+        {
+          id: 2,
+          name: "삼국시대 전시실",
+          title: "제2전시실: 고대 강원의 성장",
+          locationTag: "상설전시관 1층",
+          themeColor: "blue",
+          leadArtifact: {
+            name: "강릉 초당동 신라 금귀걸이",
+            era: "삼국시대 (신라 5~6세기)",
+            origin: "강원 강릉시 초당동 고분군 출토",
+            imgUrl: FALLBACK_ILLUSTRATIONS.earring,
+            desc: "화려한 금 알갱이와 가는 금선으로 장식된 신라 전성기 최고급 금속공예품으로 강원 영동 지역 지배층의 위상을 보여줍니다."
+          },
+          missions: [
+            { id: 1, title: "진열장 속 괴도의 스파이 유물 색출", type: "spot", completed: false, clue: "보물의 표정: 세상의 시름을 잊게 만드는 온화한 미소" },
+            { id: 2, title: "삼국 역사 다이얼 암호 해독", type: "cipher", completed: false, clue: "보물의 성격: 스스로 깨달음을 얻고 중생을 돕는 성자" },
+            { id: 3, title: "최애 삼국 유물 사진 촬영 & 프레임 수집", type: "photo", completed: false, clue: "황금 귀걸이 뱃지 수여" }
+          ],
+          photo: null,
+          badgeName: "황금 귀걸이 뱃지",
+          badgeIcon: "fa-ring"
+        },
+        {
+          id: 3,
+          name: "고려·조선 & 브랜드실",
+          title: "제3전시실: 빛깔과 얼의 명품",
+          locationTag: "상설전시관 2층 & 브랜드실",
+          themeColor: "emerald",
+          leadArtifact: {
+            name: "영월 창령사 터 오백나한",
+            era: "고려 말 ~ 조선 초 (석조 조각)",
+            origin: "강원 영월군 남면 창령사지 출토 (국립춘천박물관 대표 브랜드)",
+            imgUrl: FALLBACK_ILLUSTRATIONS.arhat,
+            desc: "국립춘천박물관의 가장 사랑받는 시그니처 유물로, 각기 다른 소박하고 너그러운 미소로 현대인들에게 따뜻한 위로와 사색을 선물합니다."
+          },
+          missions: [
+            { id: 1, title: "고려 비색 청자 vs 순백자 감정", type: "classify", completed: false, clue: "보물이 잠들어 있던 장소: 강원도 영월의 고요한 옛 절터" },
+            { id: 2, title: "사라진 보물의 최종 정체 추리", type: "final_riddle", completed: false, clue: "최종 보물 확정: 영월 창령사 터 오백나한" },
+            { id: 3, title: "최애 오백나한 사진 촬영 & 프레임 수집", type: "photo", completed: false, clue: "비취빛 나한 뱃지 수여" }
+          ],
+          photo: null,
+          badgeName: "비취빛 나한 뱃지",
+          badgeIcon: "fa-hands-praying"
+        }
+      ]
+    };
+
+    function showToast(msg, icon = 'fa-bell') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      if (!toast || !toastMsg || !toastIcon) return;
+
+      toastMsg.innerText = msg;
+      toastIcon.className = `fa-solid ${icon} text-museum-gold text-sm`;
+      toast.classList.remove('opacity-0', '-translate-y-24');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-24');
+      }, 2300);
+    }
+
+    function showModal(title, desc, icon = 'fa-circle-info', callback = null) {
+      const modal = document.getElementById('customModal');
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      const iconBox = document.getElementById('modalIconBox');
+      iconBox.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+      modal.classList.remove('hidden');
+
+      const confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.onclick = () => {
+        playSound('click');
+        modal.classList.add('hidden');
+        if (callback) callback();
+      };
+    }
+
+    // Safe downloader that handles iframe sandboxing and mobile devices
+    function triggerDownloadSafe(dataUrl, filename, modalTitle) {
+      let downloadSucceeded = false;
+      try {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = dataUrl;
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        downloadSucceeded = true;
+      } catch (e) {
+        console.warn('Direct download blocked by environment:', e);
+      }
+
+      // Always open the fallback preview modal so users can long-press or tap to save
+      const previewModal = document.getElementById('imageSaveModal');
+      const modalImg = document.getElementById('imageSaveModalImg');
+      const modalDlBtn = document.getElementById('imageSaveModalDownloadBtn');
+      const modalTitleEl = document.getElementById('imageSaveModalTitle');
+
+      if (previewModal && modalImg) {
+        modalTitleEl.innerHTML = `<i class="fa-solid fa-circle-check text-green-600"></i> ${modalTitle}`;
+        modalImg.src = dataUrl;
+        modalDlBtn.href = dataUrl;
+        modalDlBtn.download = filename;
+        previewModal.classList.remove('hidden');
+      }
+
+      if (downloadSucceeded) {
+        showToast('사진이 준비되었습니다!', 'fa-download');
+      }
+    }
+
+    // Modal Close events
+    document.getElementById('closeImageSaveModalBtn').onclick = () => {
+      document.getElementById('imageSaveModal').classList.add('hidden');
+    };
+    document.getElementById('imageSaveModalCloseBtn').onclick = () => {
+      document.getElementById('imageSaveModal').classList.add('hidden');
+    };
+
+    function updateHeaderAndStatus() {
+      const indicator = document.getElementById('currentRoomIndicator');
+      const badge = document.getElementById('collectedCountBadge');
+      const footerName = document.getElementById('footerDetectiveName');
+      const progressPill = document.getElementById('progressPill');
+
+      footerName.innerText = museumData.detectiveName;
+      const totalPhotos = museumData.rooms.filter(r => r.photo !== null).length;
+      badge.innerText = totalPhotos;
+
+      let completedCount = 0;
+      museumData.rooms.forEach(r => {
+        r.missions.forEach(m => {
+          if (m.completed) completedCount++;
+        });
+      });
+      progressPill.innerText = `미션 ${completedCount}/9 • 사진 ${totalPhotos}/3`;
+
+      if (museumData.currentRoomIndex === 0) {
+        indicator.innerText = "사건 접수처 (입구)";
+      } else if (museumData.currentRoomIndex >= 1 && museumData.currentRoomIndex <= 3) {
+        indicator.innerText = museumData.rooms[museumData.currentRoomIndex - 1].name;
+      } else {
+        indicator.innerText = "수사 종결 & 명탐정 임명식";
+      }
+    }
+
+    // Guide Modal Handlers
+    document.getElementById('guideInfoBtn').onclick = () => {
+      playSound('click');
+      document.getElementById('infoModal').classList.remove('hidden');
+    };
+    document.getElementById('closeInfoModalBtn').onclick = () => {
+      playSound('click');
+      document.getElementById('infoModal').classList.add('hidden');
+    };
+    document.getElementById('ackInfoBtn').onclick = () => {
+      playSound('click');
+      document.getElementById('infoModal').classList.add('hidden');
+    };
+
+    const screenArea = document.getElementById('screenArea');
+
+    window.renderIntro = function() {
+      museumData.currentRoomIndex = 0;
+      updateHeaderAndStatus();
+
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between items-center text-center animate-fade-in py-1">
+          
+          <div class="w-full">
+            <div class="inline-flex items-center gap-1.5 bg-amber-100/90 text-amber-950 text-xs px-3 py-1 rounded-full font-bold mb-2 border border-amber-300 shadow-sm">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+              <span>국립춘천박물관 학예실 긴급 의뢰</span>
+            </div>
+            
+            <h2 class="font-jua text-2xl text-museum-navy leading-tight">
+              시공간의 틈으로 사라진<br>
+              <span class="text-amber-600 underline decoration-museum-gold underline-offset-4">오백나한의 비밀을 밝혀라!</span>
+            </h2>
+
+            <p class="text-xs text-slate-600 mt-2 px-1 leading-relaxed">
+              괴도 X가 국립춘천박물관의 3개 전시실에 비밀 단서를 숨겨두었습니다.
+              선사시대부터 고려·조선시대까지 전시실을 누비며 <strong>수수께끼를 풀고, 마음에 드는 최애 유물을 직접 촬영</strong>하여 사라진 강원의 국보급 보물을 구출하세요!
+            </p>
+          </div>
+
+          <!-- Hero Graphic Card -->
+          <div class="my-3 w-full bg-gradient-to-b from-white to-amber-50/80 p-4 rounded-3xl border-2 border-museum-gold/50 shadow-md flex flex-col items-center relative overflow-hidden">
+            <div class="w-24 h-24 rounded-2xl bg-museum-navy border-4 border-museum-gold flex flex-col items-center justify-center text-white shadow-lg mb-2 relative">
+              <i class="fa-solid fa-user-secret text-4xl text-museum-gold mb-0.5"></i>
+              <span class="font-jua text-[10px] text-amber-200">명탐정 임명</span>
+              <span class="absolute -bottom-2 bg-red-600 text-[9px] text-white px-2 py-0.2 rounded-full font-bold shadow">
+                출동 대기
+              </span>
+            </div>
+
+            <div class="text-center mt-1">
+              <p class="font-jua text-sm text-museum-navy">국립춘천박물관 탐험 코스</p>
+              <div class="flex justify-center items-center gap-1 mt-1 text-[10px] font-bold text-slate-600">
+                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">1전시실(선사)</span>
+                <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
+                <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">2전시실(삼국)</span>
+                <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
+                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">3전시실(나한)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detective Name Input -->
+          <div class="w-full bg-white p-3.5 rounded-2xl shadow-sm border border-amber-300/70 mb-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 text-left flex items-center justify-between">
+              <span><i class="fa-solid fa-signature text-amber-600 mr-1"></i> 탐정 수사관 성명:</span>
+              <span class="text-[10px] text-slate-400 font-normal">공식 임명장에 기재됩니다</span>
+            </label>
+            <div class="flex gap-2">
+              <input type="text" id="nameInput" value="${museumData.detectiveName}" maxlength="10" placeholder="예: 춘천홈즈"
+                class="w-full px-3 py-2 text-sm border-2 border-amber-300 rounded-xl focus:outline-none focus:border-museum-navy font-jua bg-slate-50 text-museum-navy">
+            </div>
+          </div>
+
+          <!-- Start Adventure Button -->
+          <button id="startAdventureBtn" class="w-full bg-gradient-to-r from-museum-navy via-slate-800 to-museum-deep hover:from-slate-800 hover:to-museum-navy text-white font-jua text-base py-3.5 rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-2 border border-museum-gold/40 transition">
+            <i class="fa-solid fa-magnifying-glass text-museum-gold"></i>
+            <span>제1전시실(강원의 선사) 수사 개시!</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+
+        </div>
+      `;
+
+      document.getElementById('startAdventureBtn').addEventListener('click', () => {
+        const inputName = document.getElementById('nameInput').value.trim();
+        if (inputName) museumData.detectiveName = inputName;
+        playSound('correct');
+        showToast(`${museumData.detectiveName} 탐정님, 수사를 시작합니다!`, 'fa-compass');
+        window.goToRoom(1);
+      });
+    };
+
+    window.goToRoom = function(roomIndex) {
+      museumData.currentRoomIndex = roomIndex;
+      updateHeaderAndStatus();
+
+      const room = museumData.rooms[roomIndex - 1];
+      const allCompleted = room.missions.every(m => m.completed);
+      const lead = room.leadArtifact;
+      const themeBorderColor = room.id === 1 ? 'border-amber-500' : room.id === 2 ? 'border-blue-600' : 'border-emerald-600';
+
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in space-y-3">
+          
+          <!-- Room Title Header Banner -->
+          <div class="bg-white rounded-2xl p-3.5 shadow-sm border-l-4 ${themeBorderColor}">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                ${room.locationTag} • 탐험구역 [${room.id} / 3]
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded-full ${allCompleted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'} font-bold flex items-center gap-1">
+                ${allCompleted ? '<i class="fa-solid fa-circle-check"></i> 구역 완료' : '<i class="fa-solid fa-spinner animate-spin"></i> 수사 진행 중'}
+              </span>
+            </div>
+            <h2 class="font-jua text-lg text-museum-navy mt-1">${room.title}</h2>
+            <p class="text-[11px] text-slate-500">${room.name}의 3가지 핵심 활동을 완수하세요.</p>
+          </div>
+
+          <!-- Lead Curated Artifact Card -->
+          <div class="bg-white rounded-2xl p-3 shadow-sm border border-amber-200/80">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-museum-navy flex items-center gap-1">
+                <i class="fa-solid fa-landmark text-amber-600"></i> 박물관 대표 유물 관찰
+              </span>
+              <span class="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-medium">현장 전시품</span>
+            </div>
+
+            <div class="flex gap-3 items-center">
+              <div id="leadArtifactBox_${room.id}" class="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 relative group cursor-pointer" onclick="window.triggerLeadArtifactUpload(${room.id})">
+                <img id="leadArtifactImg_${room.id}" src="${lead.imgUrl}" alt="${lead.name}" class="w-full h-full object-cover" 
+                  onerror="window.handleArtifactImgError(this, ${room.id})">
+                <div id="leadArtifactBadge_${room.id}" class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center py-0.5 font-bold">
+                  단서 유물
+                </div>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-jua text-sm text-slate-900 leading-tight">${lead.name}</h4>
+                <p class="text-[10px] text-amber-700 font-bold mt-0.5">${lead.era}</p>
+                <p class="text-[11px] text-slate-600 mt-1 line-clamp-2 leading-snug">${lead.desc}</p>
+                <div class="mt-1.5 flex items-center gap-1">
+                  <button onclick="window.triggerLeadArtifactUpload(${room.id})" class="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md border border-amber-300 flex items-center gap-1 active:scale-95 transition">
+                    <i class="fa-solid fa-camera text-amber-700"></i> 직접 유물 사진 등록
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3-Step Missions List -->
+          <div class="space-y-2 flex-1">
+            <p class="text-xs font-bold text-slate-700 flex items-center gap-1 px-1">
+              <i class="fa-solid fa-list-check text-amber-600"></i> ${room.name} 3대 수사 임무:
+            </p>
+
+            ${room.missions.map((m, idx) => `
+              <div class="bg-white rounded-xl p-3 shadow-sm border ${m.completed ? 'border-green-300 bg-green-50/40' : 'border-slate-200'} flex items-center justify-between transition hover:border-amber-400">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-full ${m.completed ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-jua text-xs font-bold shadow-sm shrink-0">
+                    ${m.completed ? '<i class="fa-solid fa-check"></i>' : idx + 1}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <h3 class="font-jua text-sm text-slate-800 leading-snug">${m.title}</h3>
+                      ${idx === 2 ? '<span class="text-[9px] bg-red-100 text-red-700 font-bold px-1.5 py-0.2 rounded">촬영필수</span>' : ''}
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">
+                      ${idx === 0 ? '현장 관찰 & 퀴즈 풀기' : idx === 1 ? '인터랙티브 퍼즐 풀기' : '나만의 최애 유물 사진 스마트폰 저장'}
+                    </p>
+                  </div>
+                </div>
+
+                <button onclick="window.launchMission(${room.id}, ${m.id})" 
+                  class="px-3 py-1.5 rounded-lg text-xs font-jua active:scale-95 shadow transition shrink-0 ${m.completed ? 'bg-slate-200 text-slate-700' : 'bg-museum-navy text-white hover:bg-slate-800'}">
+                  ${m.completed ? '다시보기' : '도전하기'}
+                </button>
+              </div>
+            `).join('')}
+
+            <!-- Photo Captured Thumbnail Bar -->
+            ${room.photo ? `
+              <div class="bg-amber-50/90 p-2.5 rounded-xl border border-amber-300 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-2.5">
+                  <img src="${room.photo}" class="w-11 h-11 object-cover rounded-lg border-2 border-white shadow">
+                  <div>
+                    <span class="text-[9px] text-green-700 font-bold bg-green-100 px-1.5 py-0.5 rounded">
+                      <i class="fa-solid fa-circle-check"></i> 앨범 저장 & 수첩 보관됨
+                    </span>
+                    <p class="text-xs font-jua text-slate-800 mt-0.5">제${room.id}전시실 최애 유물 프레임</p>
+                  </div>
+                </div>
+                <button onclick="window.openNotebook()" class="text-xs font-jua text-amber-700 underline px-2 py-1">수첩에서 보기</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Bottom Forward Navigation -->
+          <div class="pt-2">
+            ${allCompleted ? `
+              <button onclick="${room.id < 3 ? `window.goToRoom(${room.id + 1})` : `window.renderEnding()`}" 
+                class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-jua text-sm py-3.5 rounded-2xl shadow-lg active:scale-95 flex items-center justify-center gap-2 pulse-soft">
+                <span>${room.id < 3 ? `다음 제${room.id + 1}전시실로 이동` : `🎉 사라진 최종 보물 구출하기!`}</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            ` : `
+              <div class="text-center bg-slate-100/90 py-2.5 rounded-xl border border-slate-200">
+                <p class="text-xs text-slate-500 font-bold">
+                  <i class="fa-solid fa-lock text-amber-600 mr-1"></i> 3가지 활동(퀴즈, 퍼즐, 사진촬영)을 모두 완료해야 다음 단계가 열립니다!
+                </p>
+              </div>
+            `}
+          </div>
+
+        </div>
+      `;
+    };
+
+    window.launchMission = function(roomId, missionId) {
+      playSound('click');
+      if (roomId === 1) {
+        if (missionId === 1) renderRoom1Mission1();
+        else if (missionId === 2) renderRoom1Mission2();
+        else if (missionId === 3) renderPhotoMission(roomId);
+      } else if (roomId === 2) {
+        if (missionId === 1) renderRoom2Mission1();
+        else if (missionId === 2) renderRoom2Mission2();
+        else if (missionId === 3) renderPhotoMission(roomId);
+      } else if (roomId === 3) {
+        if (missionId === 1) renderRoom3Mission1();
+        else if (missionId === 2) renderRoom3Mission2();
+        else if (missionId === 3) renderPhotoMission(roomId);
+      }
+    };
+
+    function completeMission(roomId, missionId) {
+      const room = museumData.rooms[roomId - 1];
+      const mission = room.missions.find(m => m.id === missionId);
+      if (mission) mission.completed = true;
+      playSound('fanfare');
+      showToast(`단서 획득: [${mission.clue}]`, 'fa-award');
+      setTimeout(() => {
+        window.goToRoom(roomId);
+      }, 700);
+    }
+
+    function renderRoom1Mission1() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-amber-700 font-bold mb-1">
+              <span>제1전시실 (강원의 선사) | 활동 1</span>
+              <button onclick="window.goToRoom(1)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">빗살무늬의 비밀 패턴 관찰</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              춘천 중도 유적에서 출토된 <strong>빗살무늬토기</strong>를 진열장에서 직접 살펴보세요!
+              신석기시대 사람들은 왜 토기의 밑바닥을 평평하지 않고 <strong>뾰족한 V자 형태(첨저)</strong>로 만들었을까요?
+            </p>
+
+            <div class="my-3 bg-white p-3 rounded-2xl border border-amber-200 text-center shadow-sm">
+              <div class="relative w-44 h-44 mx-auto rounded-xl overflow-hidden bg-amber-50 border border-amber-300">
+                <img src="${FALLBACK_ILLUSTRATIONS.pottery}" alt="빗살무늬토기" class="w-full h-full object-contain p-1">
+                <span class="absolute bottom-1 right-1 bg-museum-navy/85 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">
+                  춘천 중도 출토 (1층 제1전시실)
+                </span>
+              </div>
+              <p class="text-[11px] text-amber-900 font-bold mt-2">💡 돋보기 포인트: 뾰족한 밑바닥 모양</p>
+            </div>
+
+            <div class="space-y-2">
+              <button onclick="window.checkR1M1(1)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-amber-500 text-xs font-bold transition active:scale-95 shadow-sm">
+                ① 모래밭이나 강가 모래톱에 푹 꽂아 세워두기 위해
+              </button>
+              <button onclick="window.checkR1M1(2)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-amber-500 text-xs font-bold transition active:scale-95 shadow-sm">
+                ② 현대의 미끄러운 유리 식탁 위에 세워두기 위해
+              </button>
+              <button onclick="window.checkR1M1(3)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-amber-500 text-xs font-bold transition active:scale-95 shadow-sm">
+                ③ 팽이처럼 바닥에서 빙글빙글 돌리기 위해
+              </button>
+            </div>
+          </div>
+
+          <button onclick="window.goToRoom(1)" class="w-full mt-3 bg-slate-200 text-slate-700 font-jua py-2.5 rounded-xl text-xs">전시실로 돌아가기</button>
+        </div>
+      `;
+    }
+    window.checkR1M1 = function(choice) {
+      if (choice === 1) {
+        showModal('정답입니다! 🎯', '훌륭해요! 신석기인들은 강변 모래밭에 움집을 짓고 살았기 때문에 바닥에 꽂아 세워두는 뾰족한 바닥(첨저)이 훨씬 편리했습니다.\n\n[수사 단서 #1 확보]: 사라진 보물은 수천 년 풍파를 견딘 단단한 석조의 힘을 지니고 있습니다!', 'fa-circle-check', () => {
+          completeMission(1, 1);
+        });
+      } else {
+        playSound('wrong');
+        showModal('다시 관찰해 보세요! 🧐', '신석기 시대 사람들은 주로 강가나 바닷가 모래밭 주변에 살았습니다. 모래에 그릇을 어떻게 세웠을지 상상해 보세요!', 'fa-circle-xmark');
+      }
+    };
+
+    function renderRoom1Mission2() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-amber-700 font-bold mb-1">
+              <span>제1전시실 (강원의 선사) | 활동 2</span>
+              <button onclick="window.goToRoom(1)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">선사시대 간석기 용도 짝맞추기</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              춘천 천전리와 신매리 등에서 출토된 <strong>간석기(갈아 만든 돌도구)</strong>의 생김새와 용도를 올바르게 연결하여 괴도의 암호를 푸세요!
+            </p>
+
+            <div class="mt-3 space-y-3 bg-white p-3.5 rounded-2xl border border-amber-200 text-xs shadow-sm">
+              <div class="flex items-center justify-between p-2.5 bg-amber-50/80 rounded-xl">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">🪓</span>
+                  <div>
+                    <span class="font-bold text-amber-950 block">1. 돌도끼 & 홈자귀</span>
+                    <span class="text-[10px] text-slate-500">묵직하고 날이 선 도구</span>
+                  </div>
+                </div>
+                <select id="toolMatch1" class="border-2 border-amber-300 rounded-lg px-2 py-1.5 bg-white font-bold text-xs">
+                  <option value="">용도 선택...</option>
+                  <option value="tree">나무를 베고 목재를 다듬을 때</option>
+                  <option value="grain">곡식의 이삭을 하나씩 잘라낼 때</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 bg-amber-50/80 rounded-xl">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">🌾</span>
+                  <div>
+                    <span class="font-bold text-amber-950 block">2. 반달돌칼</span>
+                    <span class="text-[10px] text-slate-500">가운데 구멍이 뚫린 반달 형태</span>
+                  </div>
+                </div>
+                <select id="toolMatch2" class="border-2 border-amber-300 rounded-lg px-2 py-1.5 bg-white font-bold text-xs">
+                  <option value="">용도 선택...</option>
+                  <option value="tree">나무를 베고 목재를 다듬을 때</option>
+                  <option value="grain">곡식의 이삭을 하나씩 잘라낼 때</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-200 text-[11px] text-blue-950 leading-relaxed">
+              💡 <strong>학예연구사 힌트:</strong> 반달돌칼의 끈 구멍에 끈을 꿰어 손가락에 걸고 벼 이삭을 똑똑 꺾어 수확했답니다!
+            </div>
+          </div>
+
+          <button id="verifyR1M2" class="w-full mt-3 bg-museum-navy text-white font-jua py-3.5 rounded-2xl text-sm shadow active:scale-95">
+            추리 결과 검증하기
+          </button>
+        </div>
+      `;
+
+      document.getElementById('verifyR1M2').onclick = () => {
+        const t1 = document.getElementById('toolMatch1').value;
+        const t2 = document.getElementById('toolMatch2').value;
+        if (t1 === 'tree' && t2 === 'grain') {
+          showModal('명쾌한 추리입니다! 🪨', '선사시대 강원도민의 지혜를 훌륭히 풀어냈습니다!\n\n[수사 단서 #2 확보]: 사라진 보물은 소박하고 순수한 흙과 돌의 온기를 머금고 있습니다.', 'fa-circle-check', () => {
+            completeMission(1, 2);
+          });
+        } else {
+          playSound('wrong');
+          showModal('짝이 맞지 않습니다 💦', '돌도끼와 반달돌칼의 생김새 및 힌트를 다시 확인해 보세요!', 'fa-triangle-exclamation');
+        }
+      };
+    }
+
+    function renderRoom2Mission1() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-blue-700 font-bold mb-1">
+              <span>제2전시실 (고대 강원의 성장) | 활동 1</span>
+              <button onclick="window.goToRoom(2)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">진열장 속 괴도의 스파이 유물 색출!</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              괴도 X가 강원도 삼국시대 진열장에 <strong>현대 물건 1개</strong>를 몰래 떨어뜨렸습니다! 4가지 물건 중 삼국시대에 존재할 수 없는 가짜를 찾아 터치하세요!
+            </p>
+
+            <div class="mt-3 grid grid-cols-2 gap-2.5">
+              <div onclick="window.checkR2Spy(false)" class="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center cursor-pointer hover:border-amber-400 active:scale-95 transition shadow-sm">
+                <i class="fa-solid fa-shield-halved text-3xl text-slate-700 mb-1.5"></i>
+                <p class="text-xs font-bold text-slate-800">철제 비늘갑옷</p>
+                <span class="text-[10px] text-slate-400">삼국 무사의 방어구</span>
+              </div>
+
+              <div onclick="window.checkR2Spy(true)" class="bg-white p-3 rounded-2xl border-2 border-red-300 text-center cursor-pointer hover:border-red-500 active:scale-95 transition shadow-sm relative">
+                <i class="fa-solid fa-mobile-screen-button text-3xl text-slate-900 mb-1.5 animate-bounce"></i>
+                <p class="text-xs font-bold text-slate-800">최신 스마트폰</p>
+                <span class="text-[10px] text-red-600 font-bold">괴도의 분실물?!</span>
+              </div>
+
+              <div onclick="window.checkR2Spy(false)" class="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center cursor-pointer hover:border-amber-400 active:scale-95 transition shadow-sm">
+                <i class="fa-solid fa-ring text-3xl text-amber-500 mb-1.5"></i>
+                <p class="text-xs font-bold text-slate-800">강릉 신라 금귀걸이</p>
+                <span class="text-[10px] text-slate-400">화려한 황금 세공품</span>
+              </div>
+
+              <div onclick="window.checkR2Spy(false)" class="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center cursor-pointer hover:border-amber-400 active:scale-95 transition shadow-sm">
+                <i class="fa-solid fa-khanda text-3xl text-slate-600 mb-1.5"></i>
+                <p class="text-xs font-bold text-slate-800">환두대도 (둥근고리칼)</p>
+                <span class="text-[10px] text-slate-400">지휘관의 칼</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="window.goToRoom(2)" class="w-full mt-3 bg-slate-200 text-slate-700 font-jua py-2.5 rounded-xl text-xs">전시실로 돌아가기</button>
+        </div>
+      `;
+    }
+    window.checkR2Spy = function(isSpy) {
+      if (isSpy) {
+        showModal('괴도의 분실물 확보! 🕵️', '삼국시대 전시관에 스마트폰이라니! 괴도 X가 떨어뜨리고 간 결정적 단서를 찾아냈습니다.\n\n[수사 단서 #3 확보]: 사라진 보물은 천 년의 시간을 뛰어넘는 온화하고 따스한 미소를 띠고 있습니다.', 'fa-circle-check', () => {
+          completeMission(2, 1);
+        });
+      } else {
+        playSound('wrong');
+        showModal('진짜 삼국시대 문화유산입니다!', '이 유물은 춘천 우두동과 강릉 초당동 등에서 출토된 삼국시대의 진품 보물입니다.', 'fa-shield');
+      }
+    };
+
+    function renderRoom2Mission2() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-blue-700 font-bold mb-1">
+              <span>제2전시실 (고대 강원의 성장) | 활동 2</span>
+              <button onclick="window.goToRoom(2)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">삼국 역사 다이얼 암호 해독</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              강원도는 고구려, 백제, 신라 세 나라의 문화가 교차했던 중요한 격전지였습니다. 괴도가 남긴 수수께끼 쪽지를 풀어 비밀 다이얼 금고를 여세요!
+            </p>
+
+            <div class="my-3 bg-amber-50/90 p-3.5 rounded-2xl border border-amber-300 shadow-inner">
+              <p class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1">
+                <i class="fa-solid fa-scroll"></i> 괴도의 수수께끼 메모:
+              </p>
+              <div class="bg-white p-3 rounded-xl border border-amber-200 text-xs font-mono text-slate-800 leading-relaxed">
+                "삼국을 통일한 나라의 글자 수 (<strong>'신라' = 2글자</strong>)에 삼국시대 세 나라의 수 (<strong>3</strong>)를 곱하고, 보물 1개의 비밀 번호 (<strong>1</strong>)를 더하라!"
+              </div>
+            </div>
+
+            <div class="text-center py-2">
+              <label class="text-xs font-bold text-slate-700 block mb-1.5">해독된 암호 번호 입력:</label>
+              <input type="number" id="cipherInput" placeholder="숫자 입력" 
+                class="w-32 text-center text-3xl font-jua py-2 border-2 border-blue-500 rounded-2xl bg-white focus:outline-none focus:ring-4 focus:ring-blue-200">
+            </div>
+          </div>
+
+          <button id="submitR2Cipher" class="w-full mt-3 bg-museum-navy text-white font-jua py-3.5 rounded-2xl text-sm shadow active:scale-95">
+            암호 금고 열기
+          </button>
+        </div>
+      `;
+
+      document.getElementById('submitR2Cipher').onclick = () => {
+        const val = document.getElementById('cipherInput').value.trim();
+        if (val === '7') {
+          showModal('비밀 금고 해제 성공! 🔓', '정답 7! 삼국시대 비밀 금고가 열렸습니다!\n\n[수사 단서 #4 확보]: 사라진 보물은 스스로 깨달음을 얻고 백성들의 고통을 보듬던 성자(나한)의 모습입니다.', 'fa-key', () => {
+            completeMission(2, 2);
+          });
+        } else {
+          playSound('wrong');
+          showModal('비밀번호가 맞지 않습니다!', '수식을 다시 계산해 보세요:\n(2 × 3) + 1 = ?', 'fa-lock');
+        }
+      };
+    }
+
+    function renderRoom3Mission1() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-emerald-700 font-bold mb-1">
+              <span>제3전시실 | 활동 1</span>
+              <button onclick="window.goToRoom(3)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">비색 청자와 순백자의 미학 감정</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              2층 제3전시실에는 고려와 조선의 명품 도자기가 전시되어 있습니다. <strong>맑은 가을 하늘과 비취옥을 닮은 푸르스름한 옥빛(비색)</strong>을 띠는 고려의 대표 도자기는 무엇일까요?
+            </p>
+
+            <div class="mt-3 space-y-2.5">
+              <button onclick="window.checkR3Color(1)" class="w-full p-3.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100 flex items-center gap-3 active:scale-95 transition text-left shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-teal-700 flex items-center justify-center text-white text-xl shadow-inner shrink-0">
+                  <i class="fa-solid fa-wine-bottle"></i>
+                </div>
+                <div>
+                  <span class="font-jua text-sm text-emerald-950 block">① 고려 비색 청자 (Celadon)</span>
+                  <p class="text-[11px] text-emerald-800">신비로운 비취빛 유약과 상감 기법의 고려 명품</p>
+                </div>
+              </button>
+
+              <button onclick="window.checkR3Color(2)" class="w-full p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-3 active:scale-95 transition text-left shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-stone-100 border border-stone-300 flex items-center justify-center text-stone-600 text-xl shadow-inner shrink-0">
+                  <i class="fa-solid fa-jar"></i>
+                </div>
+                <div>
+                  <span class="font-jua text-sm text-slate-800 block">② 조선 순백자 달항아리</span>
+                  <p class="text-[11px] text-slate-500">눈처럼 희고 너그러운 둥근 멋의 조선 명품</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <button onclick="window.goToRoom(3)" class="w-full mt-3 bg-slate-200 text-slate-700 font-jua py-2.5 rounded-xl text-xs">전시실로 돌아가기</button>
+        </div>
+      `;
+    }
+    window.checkR3Color = function(choice) {
+      if (choice === 1) {
+        showModal('명품 감정 성공! 🏺', '정확합니다! 비취빛 옥색을 띤 고려청자를 감정해 냈습니다.\n\n[수사 단서 #5 확보]: 보물이 잠들어 있던 장소는 강원도 영월의 고요한 옛 절터(창령사 터)입니다.', 'fa-circle-check', () => {
+          completeMission(3, 1);
+        });
+      } else {
+        playSound('wrong');
+        showModal('조선 백자는 순백색입니다!', '문제에서 "비취빛 옥색"을 띠는 고려 시대의 도자기를 골라보세요.', 'fa-circle-info');
+      }
+    };
+
+    function renderRoom3Mission2() {
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-emerald-700 font-bold mb-1">
+              <span>제3전시실 & 브랜드실 | 활동 2</span>
+              <button onclick="window.goToRoom(3)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">사라진 보물의 최종 정체 추리</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              지금까지 1, 2, 3전시실에서 모은 모든 단서를 결합하세요! 국립춘천박물관을 대표하는 최고의 브랜드 보물은 무엇일까요?
+            </p>
+
+            <div class="mt-3 bg-amber-50/90 p-3.5 rounded-2xl border border-amber-300 text-xs shadow-inner">
+              <p class="font-bold text-amber-900 mb-1.5 flex items-center gap-1">
+                <i class="fa-solid fa-clipboard-list text-amber-600"></i> 지금까지 수집된 결정적 단서 5가지:
+              </p>
+              <ul class="text-[11px] text-slate-700 space-y-1 list-disc list-inside">
+                <li>비바람을 견딘 소박한 화강암 석조의 생김새</li>
+                <li>바라보는 이의 마음을 편안하게 안아주는 미소</li>
+                <li>강원도 영월 창령사 터에서 잠들어 있던 문화유산</li>
+                <li>스스로 깨달음을 얻은 500명의 성자</li>
+                <li>국립춘천박물관 2층 브랜드실의 영원한 주인공</li>
+              </ul>
+            </div>
+
+            <div class="space-y-2 mt-3">
+              <button onclick="window.checkR3Final(1)" class="w-full text-left p-3.5 rounded-2xl border-2 border-emerald-500 bg-white hover:bg-emerald-50 text-xs font-bold transition active:scale-95 shadow-sm">
+                ① 영월 창령사 터 오백나한 (마음을 치유하는 미소)
+              </button>
+              <button onclick="window.checkR3Final(2)" class="w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-emerald-400 text-xs font-bold transition active:scale-95 shadow-sm">
+                ② 춘천 레고 블록 성
+              </button>
+              <button onclick="window.checkR3Final(3)" class="w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-emerald-400 text-xs font-bold transition active:scale-95 shadow-sm">
+                ③ 서양 해적선의 황금 보물상자
+              </button>
+            </div>
+          </div>
+
+          <button onclick="window.goToRoom(3)" class="w-full mt-3 bg-slate-200 text-slate-700 font-jua py-2.5 rounded-xl text-xs">전시실로 돌아가기</button>
+        </div>
+      `;
+    }
+    window.checkR3Final = function(choice) {
+      if (choice === 1) {
+        showModal('위대한 발견입니다! 🏆', '정답입니다! 국립춘천박물관의 가장 사랑받는 보물인 [창령사 터 오백나한]을 완벽히 특정했습니다!\n\n이제 브랜드실에서 마지막 [최애 나한상 촬영 활동]을 완수하고 공식 명탐정 임명장을 받으세요!', 'fa-trophy', () => {
+          completeMission(3, 2);
+        });
+      } else {
+        playSound('wrong');
+        showModal('다시 단서를 조합해 보세요!', '국립춘천박물관의 시그니처 브랜드이자 영월에서 출토된 석조 유물을 떠올려보세요.', 'fa-circle-xmark');
+      }
+    };
+
+    function renderPhotoMission(roomId) {
+      const room = museumData.rooms[roomId - 1];
+
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between animate-fade-in">
+          <div>
+            <div class="flex items-center justify-between text-xs text-amber-700 font-bold mb-1">
+              <span>${room.name} | 활동 3 (필수 수집)</span>
+              <button onclick="window.goToRoom(${roomId})" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h3 class="font-jua text-lg text-museum-navy">마음에 드는 최애 유물 사진 촬영</h3>
+            <p class="text-xs text-slate-600 mt-1">
+              ${room.name}을 둘러보고 <strong>가장 마음에 드는 유물</strong>을 직접 카메라로 찍어보세요!
+              국립춘천박물관 명탐정 공식 프레임이 합성되어 <strong>스마트폰 사진첩</strong>에 저장됩니다.
+            </p>
+
+            <!-- Viewport & Composite Container -->
+            <div class="mt-3 relative w-full aspect-square bg-slate-900 rounded-3xl overflow-hidden flex flex-col items-center justify-center border-4 border-museum-navy shadow-inner" id="cameraBox">
+              <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+              <img id="photoPreview" class="w-full h-full object-cover hidden">
+              
+              <!-- Standby Placeholder -->
+              <div id="cameraPlaceholder" class="text-center p-4 text-white">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-2">
+                  <i class="fa-solid fa-camera"></i>
+                </div>
+                <p class="text-xs font-jua text-amber-200">실시간 카메라를 켜거나<br>사진첩에서 유물 사진을 선택하세요!</p>
+                <p class="text-[10px] text-slate-400 mt-1">카메라 사용이 어려우면 아래 '대표 유물로 수집'도 가능합니다</p>
+              </div>
+
+              <!-- HUD Overlay -->
+              <div class="absolute inset-0 pointer-events-none border border-white/20 m-3 rounded-2xl flex flex-col justify-between p-2.5">
+                <div class="flex justify-between text-[10px] text-white/80 font-mono">
+                  <span>[REC] 춘천박물관</span>
+                  <span>${room.name}</span>
+                </div>
+                <div class="text-center">
+                  <span class="bg-black/60 backdrop-blur-sm text-amber-300 text-[10px] px-3 py-1 rounded-full font-bold border border-amber-400/30">
+                    <i class="fa-solid fa-crosshairs mr-1"></i> 유물 포커스 뷰파인더
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fallback Input & Canvas -->
+            <input type="file" id="fileFallbackInput" accept="image/*" class="hidden">
+            <canvas id="photoCanvas" class="hidden" width="900" height="900"></canvas>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-2 mt-3">
+            <div class="flex gap-2">
+              <button id="openLiveCameraBtn" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-jua text-xs py-3 rounded-xl shadow active:scale-95 flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-video"></i>
+                <span>실시간 카메라</span>
+              </button>
+              <button id="uploadPhotoBtn" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white font-jua text-xs py-3 rounded-xl shadow active:scale-95 flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-images"></i>
+                <span>사진첩/파일</span>
+              </button>
+            </div>
+
+            <!-- Instant Sample Button so no user is stuck even without camera permission -->
+            <button id="useSampleArtifactBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-jua text-xs py-2 rounded-xl border border-slate-300 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
+              <span>전시실 대표 유물 일러스트로 즉시 수집하기</span>
+            </button>
+
+            <button id="captureShutterBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-jua text-sm py-3.5 rounded-2xl shadow-lg active:scale-95 hidden items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-camera text-base"></i>
+              <span>찰칵! 유물 사진 캡처 & 프레임 합성</span>
+            </button>
+
+            <button id="saveToPhoneBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-jua text-sm py-3.5 rounded-2xl shadow-lg active:scale-95 hidden items-center justify-center gap-2 transition animate-pulse">
+              <i class="fa-solid fa-download"></i>
+              <span>스마트폰 앨범에 저장 & 활동 완수!</span>
+            </button>
+          </div>
+
+        </div>
+      `;
+
+      let videoStream = null;
+      const video = document.getElementById('cameraVideo');
+      const preview = document.getElementById('photoPreview');
+      const placeholder = document.getElementById('cameraPlaceholder');
+      const liveBtn = document.getElementById('openLiveCameraBtn');
+      const uploadBtn = document.getElementById('uploadPhotoBtn');
+      const sampleBtn = document.getElementById('useSampleArtifactBtn');
+      const shutterBtn = document.getElementById('captureShutterBtn');
+      const saveBtn = document.getElementById('saveToPhoneBtn');
+      const fileInput = document.getElementById('fileFallbackInput');
+      let finalCompositedDataUrl = null;
+
+      function stopStream() {
+        if (videoStream) {
+          try {
+            videoStream.getTracks().forEach(track => track.stop());
+          } catch (e) {}
+          videoStream = null;
+        }
+      }
+
+      // Live Camera Stream with strict device check
+      liveBtn.onclick = async () => {
+        playSound('click');
+        stopStream();
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showToast('이 환경에서는 실시간 카메라를 지원하지 않습니다. 사진 선택창을 엽니다.', 'fa-camera');
+          fileInput.click();
+          return;
+        }
+
+        try {
+          const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
+          videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = videoStream;
+          video.classList.remove('hidden');
+          preview.classList.add('hidden');
+          placeholder.classList.add('hidden');
+          shutterBtn.classList.remove('hidden');
+          shutterBtn.classList.add('flex');
+          saveBtn.classList.add('hidden');
+        } catch (err) {
+          console.warn('Camera access denied:', err);
+          showToast('카메라 권한을 확인해주세요. 사진 선택창으로 이동합니다.', 'fa-camera');
+          fileInput.click();
+        }
+      };
+
+      // Native File Picker Trigger
+      uploadBtn.onclick = () => {
+        playSound('click');
+        stopStream();
+        fileInput.click();
+      };
+
+      // Use sample artifact button
+      sampleBtn.onclick = () => {
+        playSound('click');
+        stopStream();
+        const sampleImg = new Image();
+        sampleImg.onload = () => {
+          renderFramedPhoto(sampleImg);
+        };
+        sampleImg.src = room.leadArtifact.imgUrl;
+      };
+
+      fileInput.onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            renderFramedPhoto(img);
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      };
+
+      // Shutter Trigger
+      shutterBtn.onclick = () => {
+        playSound('shutter');
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth || 720;
+        tempCanvas.height = video.videoHeight || 720;
+        const tctx = tempCanvas.getContext('2d');
+        tctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        const capturedImg = new Image();
+        capturedImg.onload = () => {
+          renderFramedPhoto(capturedImg);
+          stopStream();
+          video.classList.add('hidden');
+        };
+        capturedImg.src = tempCanvas.toDataURL('image/jpeg', 0.95);
+      };
+
+      // Canvas Frame Compositing
+      function renderFramedPhoto(sourceImg) {
+        const canvas = document.getElementById('photoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Parchment Background
+        ctx.fillStyle = '#faf7f2';
+        ctx.fillRect(0, 0, 900, 900);
+
+        // Photo Area Setup
+        const photoWidth = 800;
+        const photoHeight = 630;
+        const startX = 50;
+        const startY = 50;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(startX, startY, photoWidth, photoHeight);
+        ctx.clip();
+
+        // Aspect Crop logic
+        const sW = sourceImg.naturalWidth || sourceImg.width || 800;
+        const sH = sourceImg.naturalHeight || sourceImg.height || 630;
+        const imgAspect = sW / sH;
+        const boxAspect = photoWidth / photoHeight;
+        let renderW, renderH, offsetX, offsetY;
+
+        if (imgAspect > boxAspect) {
+          renderH = photoHeight;
+          renderW = sW * (photoHeight / sH);
+          offsetX = startX - (renderW - photoWidth) / 2;
+          offsetY = startY;
+        } else {
+          renderW = photoWidth;
+          renderH = sH * (photoWidth / sW);
+          offsetX = startX;
+          offsetY = startY - (renderH - photoHeight) / 2;
+        }
+        ctx.drawImage(sourceImg, offsetX, offsetY, renderW, renderH);
+        ctx.restore();
+
+        // Frame Border
+        ctx.strokeStyle = '#e2d7c5';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(startX, startY, photoWidth, photoHeight);
+
+        // Typography
+        ctx.fillStyle = '#0b1329';
+        ctx.font = 'bold 34px "Jua", sans-serif';
+        ctx.fillText(`국립춘천박물관 명탐정단 수집품`, 55, 735);
+
+        ctx.fillStyle = '#c59b27';
+        ctx.font = 'bold 24px "Noto Sans KR", sans-serif';
+        ctx.fillText(`유물 전시구역: ${room.name}`, 55, 780);
+
+        const dateStr = new Date().toLocaleDateString('ko-KR');
+        ctx.fillStyle = '#64748b';
+        ctx.font = '20px "Noto Sans KR", sans-serif';
+        ctx.fillText(`발견 수사관: ${museumData.detectiveName} | 수집일시: ${dateStr}`, 55, 825);
+
+        // Seal Stamp
+        ctx.save();
+        ctx.translate(740, 755);
+        ctx.rotate(-12 * Math.PI / 180);
+        ctx.strokeStyle = '#942226';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(0, 0, 58, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#942226';
+        ctx.font = 'bold 20px "Jua", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('수사 완료', 0, -8);
+        ctx.font = 'bold 12px "Noto Sans KR", sans-serif';
+        ctx.fillText('국립춘천박물관', 0, 16);
+        ctx.restore();
+
+        finalCompositedDataUrl = canvas.toDataURL('image/jpeg', 0.94);
+
+        preview.src = finalCompositedDataUrl;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        shutterBtn.classList.add('hidden');
+        saveBtn.classList.remove('hidden');
+        saveBtn.classList.add('flex');
+
+        playSound('correct');
+        showToast('명탐정 유물 프레임이 완성되었습니다!', 'fa-wand-magic-sparkles');
+      }
+
+      // Download and Save
+      saveBtn.onclick = () => {
+        if (!finalCompositedDataUrl) return;
+
+        room.photo = finalCompositedDataUrl;
+        const filename = `국립춘천박물관_${room.name}_최애유물_${museumData.detectiveName}.jpg`;
+        triggerDownloadSafe(finalCompositedDataUrl, filename, `${room.name} 유물 사진 완료`);
+
+        playSound('fanfare');
+        showModal('스마트폰 앨범에 저장 완료! 📸', `촬영한 최애 유물 사진이 스마트폰 앨범에 다운로드되었습니다!\n\n또한 상단 [탐정수첩]에도 안전하게 보관되었습니다.`, 'fa-circle-check', () => {
+          stopStream();
+          completeMission(roomId, 3);
+        });
+      };
+    }
+
+    const notebookModal = document.getElementById('notebookModal');
+    const openNotebookBtn = document.getElementById('openNotebookBtn');
+    const closeNotebookBtn = document.getElementById('closeNotebookBtn');
+    const notebookItemsList = document.getElementById('notebookItemsList');
+
+    window.openNotebook = function() {
+      playSound('click');
+      notebookItemsList.innerHTML = '';
+
+      // 1. Badges & Mission Clues Section
+      const cluesSection = document.createElement('div');
+      cluesSection.className = 'bg-white rounded-2xl p-3 border border-amber-200 shadow-sm';
+      cluesSection.innerHTML = `
+        <h4 class="font-jua text-xs text-museum-navy flex items-center gap-1 mb-2">
+          <i class="fa-solid fa-award text-amber-600"></i> 획득한 탐정 뱃지 & 단서 수첩
+        </h4>
+        <div class="grid grid-cols-3 gap-2">
+          ${museumData.rooms.map(r => {
+            const hasBadge = r.missions[2].completed;
+            return `
+              <div class="p-2 rounded-xl border text-center ${hasBadge ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-slate-50 border-slate-200 text-slate-400'}">
+                <i class="fa-solid ${r.badgeIcon} text-xl mb-1 ${hasBadge ? 'text-amber-600' : 'text-slate-300'}"></i>
+                <p class="font-jua text-[11px] leading-tight">${r.badgeName}</p>
+                <span class="text-[9px] font-bold ${hasBadge ? 'text-green-600' : 'text-slate-400'}">${hasBadge ? '획득완료' : '미획득'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      notebookItemsList.appendChild(cluesSection);
+
+      // 2. Photos Collection
+      const collected = museumData.rooms.filter(r => r.photo !== null);
+
+      if (collected.length === 0) {
+        const emptyBox = document.createElement('div');
+        emptyBox.className = 'text-center py-8 text-slate-400';
+        emptyBox.innerHTML = `
+          <i class="fa-regular fa-folder-open text-4xl mb-2 text-slate-300"></i>
+          <p class="font-jua text-xs text-slate-600">아직 수집된 유물 사진이 없습니다.</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">각 전시실의 [활동 3: 사진 촬영]을 완수하여 스마트폰 앨범과 수첩에 나만의 최애 유물을 채워보세요!</p>
+        `;
+        notebookItemsList.appendChild(emptyBox);
+      } else {
+        collected.forEach(room => {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'bg-white rounded-2xl p-3 border border-amber-200 shadow-sm';
+          itemEl.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="font-jua text-xs text-museum-navy">${room.name} 최애 유물</span>
+                <span class="text-[10px] text-slate-500 block">${room.leadArtifact.name}</span>
+              </div>
+              <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                ${room.badgeName}
+              </span>
+            </div>
+            <img src="${room.photo}" class="w-full h-48 object-cover rounded-xl border border-amber-300 shadow-inner">
+            <div class="mt-2.5 flex justify-end">
+              <button onclick="triggerDownloadSafe('${room.photo}', '국립춘천박물관_${room.name}_최애유물.jpg', '${room.name} 최애 유물')" 
+                class="text-xs font-jua text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-300 flex items-center gap-1 active:scale-95 shadow-sm transition">
+                <i class="fa-solid fa-download text-amber-700"></i> 폰에 다시 저장
+              </button>
+            </div>
+          `;
+          notebookItemsList.appendChild(itemEl);
+        });
+      }
+
+      notebookModal.classList.remove('hidden');
+    };
+
+    openNotebookBtn.addEventListener('click', window.openNotebook);
+    closeNotebookBtn.addEventListener('click', () => {
+      playSound('click');
+      notebookModal.classList.add('hidden');
+    });
+
+    window.renderEnding = function() {
+      museumData.currentRoomIndex = 4;
+      updateHeaderAndStatus();
+      playSound('fanfare');
+
+      screenArea.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between items-center text-center animate-fade-in py-1">
+          
+          <div>
+            <div class="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold mb-1.5 border border-green-300 shadow-sm">
+              <i class="fa-solid fa-shield-halved text-green-600"></i>
+              <span>사건 종결: 국보급 보물 구출 성공!</span>
+            </div>
+            
+            <h2 class="font-jua text-2xl text-museum-navy">
+              사라진 보물 <span class="text-amber-600">[창령사 터 오백나한]</span>을 찾았습니다!
+            </h2>
+            
+            <p class="text-xs text-slate-600 mt-1 px-1 leading-relaxed">
+              <strong>${museumData.detectiveName}</strong> 명탐정의 지혜와 발걸음으로 강원도의 영혼이 깃든 보물이 무사히 제자리로 돌아왔습니다!
+            </p>
+
+            <!-- Arhat Hero Banner -->
+            <div class="my-3 bg-gradient-to-b from-white to-amber-50/80 p-3 rounded-2xl border-2 border-museum-gold/60 shadow-md">
+              <div class="relative w-36 h-36 mx-auto rounded-2xl overflow-hidden border-2 border-museum-gold shadow">
+                <img src="${FALLBACK_ILLUSTRATIONS.arhat}" alt="창령사 터 오백나한" class="w-full h-full object-cover">
+                <span class="absolute bottom-1 inset-x-1 bg-black/60 text-white text-[9px] py-0.5 rounded font-bold">
+                  국립춘천박물관 2층 브랜드실
+                </span>
+              </div>
+              <h3 class="font-jua text-base text-museum-navy mt-2">영월 창령사 터 오백나한</h3>
+              <p class="text-[11px] text-amber-900 font-medium leading-tight mt-0.5">
+                "나에게로 가는 길, 당신의 마음을 닮은 얼굴"<br>
+                따뜻한 미소로 관람객의 마음에 쉼을 선사하는 국립춘천박물관의 자랑
+              </p>
+            </div>
+
+            <!-- 3 Collected Artifact Photos Showcase -->
+            <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+              <p class="text-[11px] font-bold text-slate-700 mb-2 text-left flex items-center gap-1">
+                <i class="fa-solid fa-camera text-amber-600"></i> ${museumData.detectiveName} 탐정이 직접 수집한 3대 전시실 최애 유물:
+              </p>
+              <div class="grid grid-cols-3 gap-2">
+                ${museumData.rooms.map(r => `
+                  <div class="aspect-square bg-slate-100 rounded-xl overflow-hidden border-2 border-amber-300 shadow-inner relative">
+                    <img src="${r.photo || r.leadArtifact.imgUrl}" class="w-full h-full object-cover">
+                    <span class="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[8px] text-center font-jua py-0.5">
+                      ${r.id}관
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Certificate Action Buttons -->
+          <div class="w-full space-y-2 mt-3">
+            <button id="downloadCertBtn" class="w-full bg-gradient-to-r from-museum-navy via-slate-800 to-museum-deep hover:from-slate-800 hover:to-museum-navy text-white font-jua text-sm py-3.5 rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-2 border border-museum-gold transition">
+              <i class="fa-solid fa-award text-museum-gold text-base"></i>
+              <span>명탐정 공식 임명장 스마트폰에 저장 (다운로드)</span>
+            </button>
+
+            <button onclick="window.renderIntro()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua text-xs py-2.5 rounded-xl transition">
+              새로운 마음으로 다시 탐험하기
+            </button>
+          </div>
+
+        </div>
+      `;
+
+      document.getElementById('downloadCertBtn').onclick = () => {
+        generateMasterCertificate();
+      };
+    };
+
+    // Asynchronous image loader helper to guarantee canvas drawing finishes properly
+    function loadImageAsync(src) {
+      return new Promise((resolve) => {
+        if (!src) {
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    async function generateMasterCertificate() {
+      playSound('shutter');
+      showToast('임명장을 제작 중입니다...', 'fa-spinner');
+
+      const certCanvas = document.createElement('canvas');
+      certCanvas.width = 900;
+      certCanvas.height = 1260;
+      const ctx = certCanvas.getContext('2d');
+
+      // Parchment Paper
+      ctx.fillStyle = '#faf7f2';
+      ctx.fillRect(0, 0, 900, 1260);
+
+      // Gold Outer Border
+      ctx.strokeStyle = '#c59b27';
+      ctx.lineWidth = 14;
+      ctx.strokeRect(30, 30, 840, 1200);
+
+      // Navy Inner Border
+      ctx.strokeStyle = '#0b1329';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(45, 45, 810, 1170);
+
+      // Header Title
+      ctx.fillStyle = '#0b1329';
+      ctx.font = 'bold 46px "Jua", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('명 탐 정 임 명 장', 450, 140);
+
+      ctx.font = 'bold 22px "Noto Sans KR", sans-serif';
+      ctx.fillStyle = '#8c6239';
+      ctx.fillText('국립춘천박물관 어린이 역사수사단', 450, 185);
+
+      // Detective Name
+      ctx.fillStyle = '#0b1329';
+      ctx.font = 'bold 36px "Jua", sans-serif';
+      ctx.fillText(`탐정 성명: ${museumData.detectiveName}`, 450, 265);
+
+      // Certificate Body Text
+      ctx.fillStyle = '#334155';
+      ctx.font = '21px "Noto Sans KR", sans-serif';
+      ctx.fillText('위 탐정은 국립춘천박물관의 제1전시실(강원의 선사),', 450, 335);
+      ctx.fillText('제2전시실(고대 강원의 성장), 제3전시실(고려·조선)의', 450, 370);
+      ctx.fillText('역사 수수께끼를 해결하고, 사라진 국보급 문화유산인', 450, 405);
+      ctx.fillText('[영월 창령사 터 오백나한]을 빛나는 관찰력으로 구출하였기에', 450, 440);
+      ctx.fillText('국립춘천박물관 공식 명탐정으로 임명합니다.', 450, 475);
+
+      // Draw 3 Student Photos ASYNCHRONOUSLY to prevent blank images
+      const boxW = 230;
+      const boxH = 230;
+
+      for (let idx = 0; idx < museumData.rooms.length; idx++) {
+        const r = museumData.rooms[idx];
+        const posX = 85 + (idx * 255);
+        const posY = 540;
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(posX, posY, boxW, boxH);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(posX, posY, boxW, boxH);
+
+        const imgSrc = r.photo || r.leadArtifact.imgUrl;
+        const loadedImg = await loadImageAsync(imgSrc);
+        if (loadedImg) {
+          ctx.drawImage(loadedImg, posX, posY, boxW, boxH);
+        }
+
+        ctx.fillStyle = '#0b1329';
+        ctx.font = 'bold 16px "Jua", sans-serif';
+        ctx.fillText(r.name, posX + (boxW / 2), posY + boxH + 28);
+      }
+
+      // Date & Museum Director
+      const today = new Date().toLocaleDateString('ko-KR');
+      ctx.fillStyle = '#64748b';
+      ctx.font = '20px "Noto Sans KR", sans-serif';
+      ctx.fillText(`발행일자: ${today}`, 450, 990);
+
+      ctx.fillStyle = '#0b1329';
+      ctx.font = 'bold 36px "Jua", sans-serif';
+      ctx.fillText('국 립 춘 천 박 물 관 장', 450, 1075);
+
+      // Red Official Seal Stamp
+      ctx.save();
+      ctx.translate(680, 1065);
+      ctx.strokeStyle = '#942226';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(-48, -48, 96, 96);
+      ctx.fillStyle = '#942226';
+      ctx.font = 'bold 22px "Jua", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('춘천박물관', 0, -8);
+      ctx.fillText('명탐정인', 0, 26);
+      ctx.restore();
+
+      // Export and safe download
+      const certUrl = certCanvas.toDataURL('image/jpeg', 0.95);
+      const filename = `국립춘천박물관_공식명탐정임명장_${museumData.detectiveName}.jpg`;
+      triggerDownloadSafe(certUrl, filename, '국립춘천박물관 명탐정 임명장');
+    }
+
+    /* =========================================================================
+       Direct Student Photo Registration for Lead Artifacts
+       ========================================================================= */
+    // Image fallback when image fails to load or link is disconnected
+    window.handleArtifactImgError = function(imgElement, roomId) {
+      const room = museumData.rooms[roomId - 1];
+      const box = document.getElementById(`leadArtifactBox_${roomId}`);
+      if (!box) return;
+
+      // Replace broken image area with interactive "Take & Register Photo" UI
+      box.innerHTML = `
+        <div class="w-full h-full flex flex-col items-center justify-center bg-amber-50/90 text-amber-900 p-1 text-center hover:bg-amber-100 transition">
+          <i class="fa-solid fa-camera text-xl text-amber-700 mb-0.5"></i>
+          <span class="font-jua text-[9px] leading-tight">사진 등록하기</span>
+          <span class="text-[7px] text-amber-800 font-medium mt-0.5">터치하여 촬영</span>
+        </div>
+      `;
+    };
+
+    // Hidden input for direct artifact lead photo upload
+    let leadUploadInput = document.createElement('input');
+    leadUploadInput.type = 'file';
+    leadUploadInput.accept = 'image/*';
+    leadUploadInput.style.display = 'none';
+    document.body.appendChild(leadUploadInput);
+
+    let currentUploadingRoomId = null;
+
+    window.triggerLeadArtifactUpload = function(roomId) {
+      playSound('click');
+      currentUploadingRoomId = roomId;
+      leadUploadInput.value = '';
+      leadUploadInput.click();
+    };
+
+    leadUploadInput.onchange = function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !currentUploadingRoomId) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const photoDataUrl = evt.target.result;
+        const room = museumData.rooms[currentUploadingRoomId - 1];
+        
+        // Update model and live view
+        room.leadArtifact.imgUrl = photoDataUrl;
+        
+        const box = document.getElementById(`leadArtifactBox_${currentUploadingRoomId}`);
+        if (box) {
+          box.innerHTML = `
+            <img src="${photoDataUrl}" alt="${room.leadArtifact.name}" class="w-full h-full object-cover">
+            <div class="absolute bottom-0 inset-x-0 bg-green-800/80 text-white text-[8px] text-center py-0.5 font-bold">
+              <i class="fa-solid fa-check"></i> 직접 등록됨
+            </div>
+          `;
+        }
+        
+        playSound('correct');
+        showToast(`${room.name} 대표 유물 사진이 등록되었습니다!`, 'fa-camera');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.renderIntro();
+    });
+  </script>
+</body>
+</html>
